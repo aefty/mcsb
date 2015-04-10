@@ -1,16 +1,19 @@
-classdef partical < handle
+classdef mdsbPrt < handle
     % Property data is private to the class
-    properties
+    properties (Access  = 'public')
         color = 'bk';
         name='Default_name';
-        dim=2;
-        data;
-        id;
+        ic;
     end % properties
+    
+    properties (SetAccess = 'protected')
+        dim=2;
+        id;
+    end % properties    
     
     methods
         %Constructor
-        function this = partical(mass,dim,color,name)
+        function this = mdsbPrt(mass,dim,color,name)
             
             if(nargin > 1)
                 this.dim = dim;
@@ -26,7 +29,7 @@ classdef partical < handle
             
 
             % [dx,dy,dz,vx,vy,vx,ax,ay,az,fx,fy,fz,ke,pe,m]
-            this.data= [
+            this.ic= [
                 rand(1,1)*5,%1dx
                 rand(1,1)*5,%2dy
                 rand(1,1)*5,%3dz
@@ -44,7 +47,7 @@ classdef partical < handle
                 mass];%15m
             
             if(this.dim ==2)
-                this.data = this.data .*[
+                this.ic = this.ic .*[
                 1,%dx
                 1,%dy
                 0,%dz
@@ -63,7 +66,7 @@ classdef partical < handle
             end
             
             if(this.dim ==1)
-                this.data = this.data .*[
+                this.ic = this.ic .*[
                 1,%dx
                 0,%dy
                 0,%dz
@@ -81,9 +84,7 @@ classdef partical < handle
                 1];%m
             end
                 
-            
             this.id = char(java.util.UUID.randomUUID);
         end  
-        
     end  % methods
 end % class
