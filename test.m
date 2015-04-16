@@ -1,60 +1,41 @@
-close;
 clear;
 clc;
+close all;
 
-n=10
+N = 10;
 
-for i = 1:n
-    
-   pList(i) = partical(1); 
-   
-   
+space = mdsbSpc(2);
+dom = space.dmn([-10, 10], [-10, 10]);
 
-   
-%    pList(i).data = [ ...
-%                 i,...%dx
-%                 0,...%dy
-%                 0,...%dz
-%                 0,...%vx
-%                 0,...%vy
-%                 0,...%vz
-%                 0,...%ax
-%                 0,...%ay
-%                 0,...%az
-%                 0,...%fx
-%                 0,...%fy
-%                 0,...%fz                
-%                 0,...%ke 
-%                 0,...%pe                 
-%                 1];...%m
-    
+set(1) = space.prtcl(1000);
+
+set(1).property.ic=[
+				0,%dx
+                0,%dy
+                0,%dz
+                0,%vx
+                0,%vy
+                0,%vz
+                0,%ax
+                0,%ay
+                0,%az
+                0,%ke
+                0,%pe
+                1000];
+for i = 2 : N
+	set(i) = space.prtcl(1);
 end
-    
-ass = assemble(pList);
 
+asm = mdsbAsm(set, dom);
 
+for i = 2 : N
+	asm.rel('spring', set(i), set(i - 1), 100);
+end
 
-% for i = 2:n
-%     
-%     %a = mod(floor(rand(1)*10),n)+1;
-%     %b = mod(floor(rand(1)*10),n)+1;
-%     
-%    ass.addRelation(pList(i),'spring',1,pList(i-1));
-%    ass.addRelation(pList(i),'rep',1,pList(i-1));   
-%     
-% end
+t = 20;
+dt = .001;
 
- ass.addRelation(pList(1),'spring',pList(2),1);
+s = mdsbSim(asm, t, dt);
 
-
-   
-loadModel;
-
-sim = simulate(ass,model,20,.03);
-
-sim.run;
-sim.visulize;
-
-
-
-
+s.run
+s.plot
