@@ -51,7 +51,7 @@ classdef mdsbSim < handle
                 'domain',this.domain, ...
                 'dim',this.dim,...
                 'time',this.t,...
-                'clock',this.dt*0,...
+                'dt',this.dt,...
                 'size',this.data_size,...
                 'select',this.select...
                 );
@@ -65,9 +65,10 @@ classdef mdsbSim < handle
 
                 for j = 1:max(size(this.dynamics))
 
+
                     dynamic_name  = char(this.dynamics(j));
 
-                     %Work Variables
+                    %Work Variables
                     DATA = this.data(:,:,i-1);
                     INFO.clock = this.dt*i;
                     K = this.K.(dynamic_name);
@@ -90,6 +91,10 @@ classdef mdsbSim < handle
 
                 %Kinetic Energy
                 this.data(:,this.select.data.ke,i) = 0.5.*this.data(:,this.select.data.m,i).*sum(this.data(:,this.select.data.v,i).^2,2);
+
+
+
+
             end
         end % run
 
@@ -114,7 +119,21 @@ classdef mdsbSim < handle
             this.select.data.pe = [10];
             this.select.data.ke = [11];
             this.select.data.m  = [12];
+            this.select.data.r  = [13];
         end %setSelector
+
+        function checkWall(this)
+
+         %   u = ones(this.data_size(1),1);
+         %   f_l = u*s.domain.range(:,1)';
+         %   f_u = u*s.domain.range(:,2)';
+
+            %Set Wall
+          %  l_diff = this.data(:,this.select.data.x)-f_l;
+          %  u_diff = this.data(:,this.select.data.x)-f_l;
+
+
+        end
 
         function plot_2d(this)
             x = this.data(:,this.select.data.x(1),:);

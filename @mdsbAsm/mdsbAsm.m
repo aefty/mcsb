@@ -46,20 +46,25 @@ classdef mdsbAsm < handle
             this.domain = domain.property;
         end
 
-        % this, dynamics , from , {to, from}
+        %                   this,dynamic,from,{to,K}
         function this = rel(this,dynamic,from,varargin)
 
-            if(nargin > 3)
-                to = varargin{1};
-            end
-
-            if(nargin == 5)
-                K = varargin{2};
-            end
-
+            %Self-binding, No Constant
             if(nargin == 3)
                 to = from;
-                K = 1;
+                K = 0.5*1;
+            end
+
+            %Self-binding, With Constant
+            if(nargin == 4)
+                to = from;
+                K =0.5*varargin{1};
+            end
+
+            %External-binding, With Constant
+            if(nargin == 5)
+                to = varargin{1};
+                K = varargin{2};
             end
 
             if(~isfield(this.K,dynamic))
@@ -79,10 +84,15 @@ classdef mdsbAsm < handle
             this.dynamics = unique(this.dynamics);
         end
 
-        function this = order(this,shape)
+        function this = order(this,cmd)
 
-            if(shape == 'grid')
+            if(cmd == 'grid')
+                num  = max(size(this.particals));
+
+
                 for partical = this.particals
+
+
 
 
                 end

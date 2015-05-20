@@ -19,29 +19,37 @@ classdef mdsbSpc
         function this = mdsbSpc(dim);
 
             if(~(0<dim<4))
-                error('Space Dimention must be 1,2 or 3');
+                error('Space Dimension must be 1,2 or 3');
             end
 
             this.dim = dim;
         end
-
+        %                     this,mass,{r,color,name}
         function this = prtcl(this,mass,varargin)
 
-            if(size(varargin,2)==1)
-                color = varargin{1};
+            if(nargin ==2)
+                r = 0;
+                color ='bk';
                 name = 'default_name';
-            elseif (size(varargin,2)==2)
-                color = varargin{1};
-                name = varargin{2};
+            elseif (nargin ==3)
+                r = varargin{1};
+                color ='bk';
+                name = 'default_name';
+            elseif (nargin ==4)
+                r = varargin{1};
+                color =varargin{2};
+                name = 'default_name';
             else
-                color = 'bk';
-                name = 'default_name';
+                r = varargin{1};
+                color =varargin{2};
+                name = varargin{3};
             end
 
             this.property.color = color;
             this.property.name = name;
+            this.property.r = r;
 
-            % [dx,dy,dz,vx,vy,vx,ax,ay,az,fx,fy,fz,ke,pe,m]
+            % [dx,dy,dz,vx,vy,vx,ax,ay,az,ke,pe,m,r]
             this.property.ic= [
                 (rand(1,1)-rand(1,1))*5,%1dx
                 (rand(1,1)-rand(1,1))*5,%2dy
@@ -52,9 +60,11 @@ classdef mdsbSpc
                 0,%7ax
                 0,%8ay
                 0,%9az
-                0,%13ke
-                0,%14pe
-                mass];%15m
+                0,%10ke
+                0,%11pe
+                mass,%12m
+                r%13r
+                ];
 
             if(this.dim ==2)
                 this.property.ic = this.property.ic .*[
@@ -69,7 +79,9 @@ classdef mdsbSpc
                 0,%az
                 0,%ke
                 0,%pe
-                1];%m
+                1,%12m
+                1%13r
+                ];
             end
 
             if(this.dim ==1)
@@ -85,7 +97,9 @@ classdef mdsbSpc
                 0,%az
                 0,%ke
                 0,%pe
-                1];%m
+                1,%12m
+                1%13r
+                ];
             end
               this.id = char(java.util.UUID.randomUUID);
               this.type = 'particle';

@@ -4,7 +4,7 @@
 % E     =  N x 1
 % A     =  N x 3
 
-function [PE,A] = spring (DATA,K,INFO)
+function [E,A] = lgp1 (DATA,K,INFO)
 
     data_size = INFO.size;
     selector = INFO.select;
@@ -13,7 +13,6 @@ function [PE,A] = spring (DATA,K,INFO)
 
     e = DATA(:,selector.data.pe);
     x = DATA(:,selector.data.x);
-    v = DATA(:,selector.data.v);
     a = DATA(:,selector.data.a);
     m = DATA(:,selector.data.m);
 
@@ -22,11 +21,10 @@ function [PE,A] = spring (DATA,K,INFO)
     delta_norm = zeros(size(x,1));
 
     for d = 1:dim
-    	r =  (x(:,d) * unitary)'  -  (x(:,d) * unitary);% Distance between each partical
-		F = -K.*r;
-        A(:,d) = sum(F)'./m;
+    	r =  (x(:,d) * unitary)'  -  (x(:,d) * unitary);
+		A(:,d) = sum(-K.*r)'./m;
 		delta_norm = delta_norm + r.^2;
     end
 
-    PE = sum(0.5.*K.*(delta_norm))'./4; %Note K_total^2 = (K_each/2)^2, thus we devide by 4 at the end
+    E = sum(0.5.*K.*(delta_norm))'./4; %Note K_total^2 = (K_each/2)^2, thus we devide by 4 at the end
 end

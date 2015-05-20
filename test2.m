@@ -2,15 +2,14 @@ clear;
 clc;
 close all;
 
-N = 10;
+N = 2;
 
 space = mdsbSpc(2);
-dom = space.dmn([-10, 20], [-10, 10]);
+dom = space.dmn([-10, 10], [-10, 10]);
 
-p(1) = space.prtcl(1000);%Set Anchor
-
+p(1) = space.prtcl(1);%Set Anchor
 p(1).property.ic=[
-	        0,%dx
+            0,%dx
                 0,%dy
                 0,%dz
                 0,%vx
@@ -21,24 +20,30 @@ p(1).property.ic=[
                 0,%az
                 0,%ke
                 0,%pe
-                1000,%r
+                100,%r
                 0
                 ];
 
 for i = 2 : N
-	p(i) = space.prtcl(1);
+	p(i) = space.prtcl(1,1);
 end
 
-asm = mdsbAsm(p, dom);
+set = mdsbAsm(p, dom);
+
+set.rel('shell', p(1),.5);
 
 for i = 2 : N
-	asm.rel('spring', p(i), p(1), 1);
+   % set.rel('spring', p(i), p(1), 10);
+    set.rel('shell', p(i),.5);
 end
 
-t = 100;
-dt = .1;
 
-s = mdsbSim(asm, t, dt);
+
+
+t = 2;
+dt = .01;
+
+s = mdsbSim(set, t, dt);
 
 s.run
 s.plot
