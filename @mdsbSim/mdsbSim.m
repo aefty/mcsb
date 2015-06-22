@@ -59,22 +59,43 @@ classdef mdsbSim < handle
             this.data = zeros([size(this.ic),itr]);
             this.data(:,:,1) = this.ic;
 
+            unitary = ones(1,this.data_size(1));
+
             for i = 2:itr
                 disp(sprintf('Progress: %.0f%%',100*i/itr));
                 this.data(:,this.select.data.m,i) = this.data(:,this.select.data.m,i-1);
 
-                for j = 1:max(size(this.dynamics))
+                r = zeros(this.data_size(1) ,this.data_size(1) ,this.dim );
+                r_theta = zeros(this.data_size(1) ,this.data_size(1) ,this.dim );
+                r_norm = zeros(this.data_size(1));
+                I = eye(this.data_size(1));
 
+                position = this.data(:,this.select.data.x,i-1);
+
+                for d = 1:this.dim
+                    r(:,:,d) =  (position(:,d) * unitary)'  -  (position(:,d) * unitary);
+                    r_norm = r_norm + r(:,:,d).^2;
+                end
+
+                r_norm = r_norm+I;
+                r_norm = r_norm.^0.5;
+
+                for d = 1:this.dim
+                    r_theta(:,:,d) = r(:,:,d)./r_norm;
+                end
+
+                for j = 1:max(size(this.dynamics))
 
                     dynamic_name  = char(this.dynamics(j));
 
                     %Work Variables
                     DATA = this.data(:,:,i-1);
+                    REL = struct('r',r,'r_norm',r_norm,'r_theta',r_theta);
                     INFO.clock = this.dt*i;
                     K = this.K.(dynamic_name);
 
                     %Calculate Dynamic
-                    [E,A] = feval(dynamic_name,DATA,K,INFO);
+                    [E,A] = feval(dynamic_name,DATA,REL,K,INFO);
 
                     %Assigns Dynamic Potential Energy (N x 1)
                     this.data(:,this.select.data.pe,i) = E + this.data(:,this.select.data.pe,i);
@@ -91,9 +112,6 @@ classdef mdsbSim < handle
 
                 %Kinetic Energy
                 this.data(:,this.select.data.ke,i) = 0.5.*this.data(:,this.select.data.m,i).*sum(this.data(:,this.select.data.v,i).^2,2);
-
-
-
 
             end
         end % run
@@ -121,19 +139,6 @@ classdef mdsbSim < handle
             this.select.data.m  = [12];
             this.select.data.r  = [13];
         end %setSelector
-
-        function checkWall(this)
-
-         %   u = ones(this.data_size(1),1);
-         %   f_l = u*s.domain.range(:,1)';
-         %   f_u = u*s.domain.range(:,2)';
-
-            %Set Wall
-          %  l_diff = this.data(:,this.select.data.x)-f_l;
-          %  u_diff = this.data(:,this.select.data.x)-f_l;
-
-
-        end
 
         function plot_2d(this)
             x = this.data(:,this.select.data.x(1),:);

@@ -84,21 +84,6 @@ classdef mdsbAsm < handle
             this.dynamics = unique(this.dynamics);
         end
 
-        function this = order(this,cmd)
-
-            if(cmd == 'grid')
-                num  = max(size(this.particals));
-
-
-                for partical = this.particals
-
-
-
-
-                end
-            end
-        end
-
     end
 end
 

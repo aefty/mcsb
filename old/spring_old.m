@@ -4,7 +4,7 @@
 % E     =  N x 1
 % A     =  N x 3
 
-function [PE,A] = spring (DATA,REL,K,INFO)
+function [PE,A] = spring_old (DATA,REL,K,INFO)
 
     data_size = INFO.size;
     selector = INFO.select;
@@ -17,17 +17,16 @@ function [PE,A] = spring (DATA,REL,K,INFO)
     a = DATA(:,selector.data.a);
     m = DATA(:,selector.data.m);
 
-    r = REL.r;
-    r_norm = REL.r_norm;
-    r_theta = REL.r_theta;
-
+    unitary = ones(1,data_size(1));
     A = zeros(size(x));
-    F = -K.*r_norm;
+    delta_norm = zeros(size(x,1));
 
     for d = 1:dim
-        A(:,d) = sum(F.* r_theta(:,:,d))'./m;
+    	r =  (x(:,d) * unitary)'  -  (x(:,d) * unitary);% Distance between each partical
+		F = -K.*r;
+        A(:,d) = sum(F)'./m;
+		delta_norm = delta_norm + r.^2;
     end
 
-    E = 0.5.*K.*(r_norm./2).^2;
-    PE = sum(E)';
+    PE = sum(0.5.*K.*(delta_norm))'./4; %Note K_total^2 = (K_each/2)^2, thus we devide by 4 at the end
 end

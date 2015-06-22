@@ -2,7 +2,7 @@ clear;
 clc;
 close all;
 
-N = 10;
+N = 5;
 
 space = mdsbSpc(2);
 dom = space.dmn([-10, 20], [-10, 10]);
@@ -32,7 +32,7 @@ end
 asm = mdsbAsm(p, dom);
 
 for i = 2 : N
-	asm.rel('spring', p(i), p(1), 1);
+	asm.rel('bond', p(i), p(1), 1);
 end
 
 t = 100;
