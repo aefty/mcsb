@@ -1,10 +1,12 @@
-% DATA  =  N x 12
-% K     =  N x N
-% INFO  =  {dim,time,clock,size,select}
-% E     =  N x 1
-% A     =  N x 3
 
-function [PE,A] = spring (DATA,REL,K,INFO)
+%% PE = Potential Energoy
+%% A  = Acceleration
+%% DATA = Data Table
+%% REL  = Relative Position Matrix
+%% K    = Dynamics Relation Matrix
+%% INFO = Variouse Parameteres
+
+function [PE,A] = angle (DATA,REL,K,INFO)
 
     data_size = INFO.size;
     selector = INFO.select;
@@ -18,16 +20,26 @@ function [PE,A] = spring (DATA,REL,K,INFO)
     m = DATA(:,selector.data.m);
 
     r = REL.r;
+    r(:,:,1)=r(:,:,1)-diag(diag(r(:,:,1)))+eye(size(r(:,:,1)));
+
     r_norm = REL.r_norm;
     r_theta = REL.r_theta;
 
+    K = K.*0.0174532925;
+
+    ang = atan(r(:,:,2)./r(:,:,1));
+
+    %pause
+
+    delAng = (ang-K);
+
     A = zeros(size(x));
-    F = -K.*r_norm;
+    F = -2*delAng./r_norm.^2;
 
     for d = 1:dim
         A(:,d) = sum(F.* r_theta(:,:,d))'./m;
     end
 
-    E = 0.5.*K.*(r_norm./2).^2;
+    E = K.*(delAng).^2;
     PE = sum(E)';
 end

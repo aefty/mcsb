@@ -1,10 +1,12 @@
-% DATA  =  N x 12
-% K     =  N x N
-% INFO  =  {dim,time,clock,size,select}
-% E     =  N x 1
-% A     =  N x 3
 
-function [PE,A] = spring (DATA,REL,K,INFO)
+%% PE = Potential Energoy
+%% A  = Acceleration
+%% DATA = Data Table
+%% REL  = Relative Position Matrix
+%% K    = Dynamics Relation Matrix
+%% INFO = Variouse Parameteres
+
+function [PE,A] = bond (DATA,REL,K,INFO)
 
     data_size = INFO.size;
     selector = INFO.select;
@@ -20,6 +22,11 @@ function [PE,A] = spring (DATA,REL,K,INFO)
     r = REL.r;
     r_norm = REL.r_norm;
     r_theta = REL.r_theta;
+
+    r_relax =.01;
+
+    r_norm = (r_norm-r_relax);
+
 
     A = zeros(size(x));
     F = -K.*r_norm;

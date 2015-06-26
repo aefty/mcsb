@@ -28,7 +28,7 @@ classdef mdsbSpc
         function this = prtcl(this,mass,varargin)
 
             if(nargin ==2)
-                r = 0;
+                r = 10;
                 color ='bk';
                 name = 'default_name';
             elseif (nargin ==3)
@@ -124,9 +124,6 @@ classdef mdsbSpc
             if (nargin > 3)
                 domain(3,:) = varargin{3};
             end
-
-
-            %this.property.range = vec2mat(cell2mat(varargin),2);
 
             this.property.range =domain;
 

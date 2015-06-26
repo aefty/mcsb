@@ -38,6 +38,7 @@ classdef mdsbAsm < handle
                 this.particalList{end+1} = partical.id;
             end
 
+            
             if(this.dim ~= domain.dim && domain.type =='domain')
                 disp(partical);
                 error('Dimension mismatch');

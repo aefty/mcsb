@@ -17,6 +17,8 @@ classdef mdsbSim < handle
         ic;
         dim;
         data_size;
+
+        temp;
     end
 
     properties (Access = public)
@@ -24,7 +26,14 @@ classdef mdsbSim < handle
     end
 
     methods (Access = public)
-        function this = mdsbSim(assembly,t,dt)
+        function this = mdsbSim(assembly,t,dt,opt_temp)
+
+            if (~exist('opt_temp', 'var'))
+                opt_temp = false;
+            else
+            
+                this.temp = opt_temp;
+            end
 
             this.t = t;
             this.dt = dt;
@@ -37,6 +46,7 @@ classdef mdsbSim < handle
 
             this.domain = assembly.domain;
 
+            % Set dynamics
             for dynamic = this.dynamics
                 temp = char(dynamic);
                 this.Kl(:,:).(temp) = logical(this.K.(temp));
@@ -62,23 +72,28 @@ classdef mdsbSim < handle
             unitary = ones(1,this.data_size(1));
 
             for i = 2:itr
+
                 disp(sprintf('Progress: %.0f%%',100*i/itr));
                 this.data(:,this.select.data.m,i) = this.data(:,this.select.data.m,i-1);
+                this.data(:,this.select.data.r,i) = this.data(:,this.select.data.r,i-1);
 
-                r = zeros(this.data_size(1) ,this.data_size(1) ,this.dim );
+                
+                % Pre assmeble Relation Matrix
+                r = zeros(this.data_size(1) ,this.data_size(1) ,this.dim ); 
                 r_theta = zeros(this.data_size(1) ,this.data_size(1) ,this.dim );
                 r_norm = zeros(this.data_size(1));
                 I = eye(this.data_size(1));
 
+                %Extract postion of the system (for next iteration based on previouse itreation)
                 position = this.data(:,this.select.data.x,i-1);
 
                 for d = 1:this.dim
-                    r(:,:,d) =  (position(:,d) * unitary)'  -  (position(:,d) * unitary);
-                    r_norm = r_norm + r(:,:,d).^2;
+                    r(:,:,d) =  (position(:,d) * unitary)'  -  (position(:,d) * unitary); % Calculate dimnetinal length
+                    r_norm = r_norm + r(:,:,d).^2; %Calculate Norm Length
                 end
 
                 r_norm = r_norm+I;
-                r_norm = r_norm.^0.5;
+                r_norm = r_norm.^0.5; 
 
                 for d = 1:this.dim
                     r_theta(:,:,d) = r(:,:,d)./r_norm;
@@ -110,9 +125,12 @@ classdef mdsbSim < handle
                 %Velocity
                 this.data(:,this.select.data.v,i) = (this.data(:,this.select.data.x,i) - this.data(:,this.select.data.x,i-1) )./this.dt;
 
+                if(this.temp)
+                    this.thermoStat(i);
+                end
+
                 %Kinetic Energy
                 this.data(:,this.select.data.ke,i) = 0.5.*this.data(:,this.select.data.m,i).*sum(this.data(:,this.select.data.v,i).^2,2);
-
             end
         end % run
 
@@ -143,6 +161,9 @@ classdef mdsbSim < handle
         function plot_2d(this)
             x = this.data(:,this.select.data.x(1),:);
             y = this.data(:,this.select.data.x(2),:);
+            r = this.data(:,this.select.data.r,:);   
+
+                   
             scrsz = get(groot,'ScreenSize');
 
             pe = sum(this.data(:,this.select.data.pe,:));
@@ -166,15 +187,22 @@ classdef mdsbSim < handle
             grid on
             grid minor
             legend('Potential Energy','Kinetic Energy','Total Energy');
+            ylabel('Energy');
+            title('System Energy');
+            
 
             figure('Position',[scrsz(3)/2 scrsz(4)/2 scrsz(3)/2 scrsz(4)/2]);
             for k = 1:itr
                 disp(sprintf('Progress: %.0f%% - %d',100*k/itr,k));
 
+
+
                 plot(...
                     x(:,k),...
                     y(:,k),...
-                    'ro','MarkerFaceColor','w','MarkerEdgeColor','k','MarkerSize',20);
+                    'ro','MarkerFaceColor','w','MarkerEdgeColor','k','MarkerSize',10);
+
+
                 grid on
                 grid minor
 
@@ -184,6 +212,22 @@ classdef mdsbSim < handle
                 drawnow
             end
         end %plot_2d
+    
+        function thermoStat(this,i)
+            m = [this.data(:,this.select.data.m,1),this.data(:,this.select.data.m,1)];
+            sd = sqrt(this.temp*1./m);
+            
+            % get random vector
+            rand_s = rand(this.dim,this.data_size(1))';
+            
+            % Get logic version of the vector (loser the numer the slower the diffusion of )
+            rand_c = (rand_s<0.03*this.dt);
+
+            v =  sd.*randn(this.dim,this.data_size(1))';
+
+            this.data(:,this.select.data.v(1:this.dim),i) = this.data(:,this.select.data.v(1:this.dim),i) - this.data(:,this.select.data.v(1:this.dim),i).*rand_c;
+            this.data(:,this.select.data.v(1:this.dim),i) = this.data(:,this.select.data.v(1:this.dim),i) + v.*rand_c;
+        end
     end%method
 end %object
 
